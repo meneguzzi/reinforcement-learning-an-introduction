@@ -98,7 +98,7 @@ class Bandit:
         return reward
 
 
-def simulate(runs, time, bandits):
+def simulate(runs, time, bandits, non_stationary=False):
     rewards = np.zeros((len(bandits), runs, time))
     best_action_counts = np.zeros(rewards.shape)
     for i, bandit in enumerate(bandits):
@@ -110,6 +110,8 @@ def simulate(runs, time, bandits):
                 rewards[i, r, t] = reward
                 if action == bandit.best_action:
                     best_action_counts[i, r, t] = 1
+                if non_stationary: # Change the true reward
+                    bandit.q_true = bandit.q_true+np.random.normal(loc=0.0,scale=0.1,size=bandit.k)
     mean_best_action_counts = best_action_counts.mean(axis=1)
     mean_rewards = rewards.mean(axis=1)
     return mean_best_action_counts, mean_rewards
@@ -120,6 +122,7 @@ def figure_2_1():
     plt.xlabel("Action")
     plt.ylabel("Reward distribution")
     plt.savefig('../images/figure_2_1.png')
+    plt.savefig('../images/figure_2_1.pdf')
     plt.close()
 
 
@@ -145,6 +148,7 @@ def figure_2_2(runs=2000, time=1000):
     plt.legend()
 
     plt.savefig('../images/figure_2_2.png')
+    plt.savefig('../images/figure_2_2.pdf')
     plt.close()
 
 
@@ -161,6 +165,7 @@ def figure_2_3(runs=2000, time=1000):
     plt.legend()
 
     plt.savefig('../images/figure_2_3.png')
+    plt.savefig('../images/figure_2_3.pdf')
     plt.close()
 
 
@@ -177,6 +182,7 @@ def figure_2_4(runs=2000, time=1000):
     plt.legend()
 
     plt.savefig('../images/figure_2_4.png')
+    plt.savefig('../images/figure_2_4.pdf')
     plt.close()
 
 
@@ -199,6 +205,7 @@ def figure_2_5(runs=2000, time=1000):
     plt.legend()
 
     plt.savefig('../images/figure_2_5.png')
+    plt.savefig('../images/figure_2_5.pdf')
     plt.close()
 
 
@@ -232,13 +239,34 @@ def figure_2_6(runs=2000, time=1000):
     plt.legend()
 
     plt.savefig('../images/figure_2_6.png')
+    plt.savefig('../images/figure_2_6.pdf')
     plt.close()
 
 
+def exercise_2_5(runs=2000, time=10000):
+    bandits = []
+    bandits.append(Bandit(epsilon=0.1, gradient=True, step_size=0.1, gradient_baseline=False, true_reward=4, sample_averages=True))
+    bandits.append(Bandit(epsilon=0.1, gradient=True, step_size=0.1, gradient_baseline=False, true_reward=4))
+    best_action_counts, _ = simulate(runs, time, bandits, non_stationary=True)
+    labels = ['Sample Averages, epsilon=0.1,, with baseline',
+              'epsilon=0.1, alpha = 0.1, with baseline']
+
+    for i in range(len(bandits)):
+        plt.plot(best_action_counts[i], label=labels[i])
+    plt.xlabel('Steps')
+    plt.ylabel('% Optimal action')
+    plt.legend()
+
+    plt.savefig('../images/exercise_2_5.png')
+    plt.savefig('../images/exercise_2_5.pdf')
+    plt.close()
+    
+
 if __name__ == '__main__':
-    figure_2_1()
-    figure_2_2()
-    figure_2_3()
-    figure_2_4()
-    figure_2_5()
-    figure_2_6()
+    # figure_2_1()
+#     figure_2_2()
+#     figure_2_3()
+#     figure_2_4()
+#     figure_2_5()
+#     figure_2_6()
+    exercise_2_5()
